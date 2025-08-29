@@ -1,120 +1,142 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TecoScan</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background: #f2f2f2; }
-    h1 { background: #2c3e50; color: white; padding: 15px; margin: 0; }
-    h2 { margin-top: 20px; }
-    video { width: 90%; max-width: 400px; border: 2px solid #333; border-radius: 8px; margin: 10px auto; display: block; }
-    input { font-size: 1.2em; padding: 8px; margin: 10px; width: 80%; max-width: 300px; }
-    button { padding: 10px 15px; margin: 5px; border: none; border-radius: 6px; background: #3498db; color: white; font-size: 1em; cursor: pointer; }
-    button:hover { background: #2980b9; }
-    ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; margin: 10px; }
-    li { background: white; padding: 6px; margin: 4px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
-    .delete-btn { background: red; color: white; border: none; border-radius: 5px; padding: 2px 8px; cursor: pointer; }
-    .delete-btn:hover { background: darkred; }
-    label { display: block; margin: 10px; font-size: 0.9em; }
-    footer { margin-top: 20px; font-size: 0.8em; color: #555; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TecoScan</title>
+<style>
+  body { font-family: Arial, sans-serif; text-align: center; margin:0; padding:0; background:#f2f2f2; }
+  h1 { background:#2c3e50; color:white; padding:15px; margin:0; }
+  h3 { font-size:14px; font-weight:normal; margin:5px 0 10px; color:#555; }
+  video { width:90%; max-width:300px; border:2px solid #333; border-radius:8px; margin:10px auto; display:block; }
+  input { font-size:1.2em; padding:8px; margin:10px; width:80%; max-width:300px; }
+  button { padding:10px 15px; margin:5px; border:none; border-radius:6px; background:#3498db; color:white; font-size:1em; cursor:pointer; }
+  button:hover { background:#2980b9; }
+  ul { list-style:none; padding:0; max-height:250px; overflow-y:auto; margin:10px; }
+  li { background:white; padding:6px; margin:4px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; }
+  li.highlight { background:#c8f7c5; transition:background 1s ease; }
+  .delete-btn { background:red; color:white; border:none; border-radius:5px; padding:2px 8px; cursor:pointer; }
+  .delete-btn:hover { background:darkred; }
+  #allowDuplicatesLabel { display:flex; align-items:center; justify-content:center; margin:10px; font-size:1em; }
+  #allowDuplicates { margin-right:8px; }
+  footer { margin-top:20px; font-size:0.8em; color:#555; }
+</style>
 </head>
 <body>
-  <h1>TecoScan <br><span style="font-size:0.7em;">by pm.foinap</span></h1>
 
-  <video id="video" autoplay></video>
-  
-  <input type="text" id="manualInput" placeholder="Ingresar etiqueta manualmente">
-  <button onclick="addManual()">Agregar</button>
+<h1>TecoScan</h1>
+<h3>by pm.foinap</h3>
 
-  <label>
-    <input type="checkbox" id="allowDuplicates">
-    Permitir duplicados
-  </label>
+<video id="video" autoplay></video>
 
-  <h2>Lecturas: <span id="count">0</span></h2>
-  <ul id="codesList"></ul>
+<input type="text" id="manualInput" placeholder="Ingresar etiqueta manualmente">
+<button onclick="addManual()">Agregar</button>
 
-  <button onclick="clearAll()">Eliminar todas</button>
-  <button onclick="generateFile()">Generar archivo TXT</button>
+<label id="allowDuplicatesLabel">
+  <input type="checkbox" id="allowDuplicates">
+  Permitir duplicados
+</label>
 
-  <footer>
-    <p>TecoScan - Gestión de stock textil</p>
-  </footer>
+<h2>Lecturas: <span id="count">0</span></h2>
+<ul id="codesList"></ul>
 
-  <script src="https://unpkg.com/@zxing/library@latest"></script>
-  <script>
-    const codeReader = new ZXing.BrowserMultiFormatReader();
-    const videoElement = document.getElementById('video');
-    const codesList = document.getElementById('codesList');
-    const manualInput = document.getElementById('manualInput');
-    const countSpan = document.getElementById('count');
-    const allowDuplicates = document.getElementById('allowDuplicates');
-    let codes = [];
+<button onclick="clearAll()">Eliminar todas</button>
+<button onclick="generateFile()">Generar archivo TXT</button>
 
-    // Sonido al leer
-    const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+<footer>
+  <p>TecoScan - Gestión de stock textil</p>
+</footer>
 
-    function updateList() {
-      codesList.innerHTML = "";
-      codes.forEach((code, index) => {
-        const li = document.createElement("li");
-        li.textContent = code;
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "X";
-        delBtn.className = "delete-btn";
-        delBtn.onclick = () => { codes.splice(index, 1); updateList(); };
-        li.appendChild(delBtn);
-        codesList.prepend(li); // último arriba
-      });
-      countSpan.textContent = codes.length;
+<script src="https://unpkg.com/@zxing/library@latest"></script>
+<script>
+const codeReader = new ZXing.BrowserMultiFormatReader();
+const videoElement = document.getElementById('video');
+const codesList = document.getElementById('codesList');
+const manualInput = document.getElementById('manualInput');
+const countSpan = document.getElementById('count');
+const allowDuplicates = document.getElementById('allowDuplicates');
+let codes = [];
+
+// Sonido al leer
+const beep = new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg");
+
+// Actualiza lista y contador
+function updateList(highlightIndex = null) {
+  codesList.innerHTML = "";
+  codes.forEach((code, index) => {
+    const li = document.createElement("li");
+    li.textContent = code;
+    if (index === highlightIndex) {
+      li.classList.add("highlight");
+      setTimeout(() => li.classList.remove("highlight"), 1500);
     }
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "X";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => { codes.splice(index,1); updateList(); };
+    li.appendChild(delBtn);
+    codesList.prepend(li); // último arriba
+  });
+  countSpan.textContent = codes.length;
+}
 
-    function addCode(newCode) {
-      if (!allowDuplicates.checked && codes.includes(newCode)) {
-        return; // bloquea duplicados
-      }
-      codes.push(newCode);
-      beep.play();
-      updateList();
-    }
+// Agregar código con control de duplicados
+function addCode(newCode) {
+  if (!newCode) return;
 
-    function addManual() {
-      const value = manualInput.value.trim();
-      if (value) {
-        addCode(value);
-        manualInput.value = "";
-      }
-    }
+  if (!allowDuplicates.checked && codes.includes(newCode)) {
+    if (!confirm(`El código "${newCode}" ya existe. ¿Desea agregarlo igual?`)) return;
+  }
 
-    function clearAll() {
-      codes = [];
-      updateList();
-    }
+  codes.push(newCode);
+  beep.play();
+  updateList(codes.length-1);
+}
 
-    function generateFile() {
-      if (codes.length === 0) {
-        alert("No hay lecturas para generar.");
-        return;
-      }
-      const blob = new Blob([codes.join("\n")], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "lecturas.txt";
-      a.click();
-      clearAll(); // limpiar después de generar
-    }
+// Agregar manual
+function addManual() {
+  const value = manualInput.value.trim();
+  if (value) {
+    addCode(value);
+    manualInput.value = "";
+  }
+}
 
-    // Activar cámara
-    codeReader
-      .listVideoInputDevices()
-      .then(videoInputDevices => {
-        codeReader.decodeFromVideoDevice(videoInputDevices[0].deviceId, videoElement, (result, err) => {
-          if (result) addCode(result.text);
-        });
-      })
-      .catch(err => console.error(err));
-  </script>
+// Limpiar lista
+function clearAll() {
+  codes = [];
+  updateList();
+}
+
+// Generar TXT y limpiar
+function generateFile() {
+  if (codes.length === 0) { alert("No hay lecturas para generar."); return; }
+  const blob = new Blob([codes.join("\n")], {type:"text/plain"});
+  const a = document.createElement("a");
+  const date = new Date();
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth()+1).padStart(2,'0');
+  const dd = String(date.getDate()).padStart(2,'0');
+  const hh = String(date.getHours()).padStart(2,'0');
+  const min = String(date.getMinutes()).padStart(2,'0');
+  a.download = `TecoScan_${yyyy}${mm}${dd}_${hh}${min}.txt`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  clearAll();
+}
+
+// Activar cámara trasera
+codeReader.listVideoInputDevices()
+  .then(videoInputDevices => {
+    const selectedDeviceId = videoInputDevices.length > 1 ? 
+      videoInputDevices[videoInputDevices.length-1].deviceId :
+      videoInputDevices[0].deviceId;
+    codeReader.decodeFromVideoDevice(selectedDeviceId, videoElement, (result, err) => {
+      if (result) addCode(result.text);
+    });
+  })
+  .catch(err => console.error(err));
+
+</script>
 </body>
 </html>
