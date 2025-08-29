@@ -117,7 +117,7 @@ function generateFile() {
   const hh = String(date.getHours()).padStart(2,'0');
   const min = String(date.getMinutes()).padStart(2,'0');
   const fechaHora = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
-  let contenido = `TecoScan\nCantidad de etiquetas: ${codes.length}\nFecha: ${fechaHora}\n\n`;
+  let contenido = `TecoScan by pmfoinap\nCantidad de etiquetas: ${codes.length}\nFecha: ${fechaHora}\n\n`;
   codes.forEach((code,i)=> contenido += `${i+1} - ${code}\n`);
   const blob = new Blob([contenido], {type:"text/plain"});
   const a = document.createElement("a");
