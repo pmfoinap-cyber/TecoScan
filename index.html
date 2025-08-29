@@ -11,7 +11,7 @@
     #video { width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 5px; }
     ul { list-style: none; padding: 0; }
     li { padding: 5px; margin: 5px 0; background: #f2f2f2; border-radius: 5px; }
-    button { margin-left: 10px; padding: 5px 10px; }
+    button { margin: 5px 5px 5px 0; padding: 5px 10px; }
     .manual-input { margin: 15px 0; }
     input[type="text"] { padding: 5px; width: 70%; }
   </style>
@@ -29,13 +29,23 @@
   </div>
 
   <h2>Lecturas:</h2>
+  <button onclick="eliminarTodo()">🗑️ Eliminar todas</button>
   <ul id="lista"></ul>
 
   <button onclick="generarArchivo()">📄 Generar archivo TXT</button>
 
+  <!-- Sonido de confirmación -->
+  <audio id="beep" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
+
   <script>
     let codigos = [];
     const lista = document.getElementById("lista");
+    const beep = document.getElementById("beep");
+
+    function reproducirBeep() {
+      beep.currentTime = 0;
+      beep.play();
+    }
 
     function mostrarLista() {
       lista.innerHTML = "";
@@ -53,14 +63,26 @@
       });
     }
 
+    function agregarCodigo(valor) {
+      if (valor && !codigos.includes(valor)) {
+        codigos.unshift(valor); // 👉 agrega al inicio
+        mostrarLista();
+        reproducirBeep();
+      }
+    }
+
     function agregarManual() {
       const input = document.getElementById("manualCode");
       const valor = input.value.trim();
-      if (valor && !codigos.includes(valor)) {
-        codigos.push(valor);
+      agregarCodigo(valor);
+      input.value = "";
+    }
+
+    function eliminarTodo() {
+      if (confirm("¿Seguro que quieres borrar todas las lecturas?")) {
+        codigos = [];
         mostrarLista();
       }
-      input.value = "";
     }
 
     function generarArchivo() {
@@ -81,17 +103,13 @@
       const codeReader = new ZXing.BrowserMultiFormatReader();
       try {
         const videoInputDevices = await codeReader.listVideoInputDevices();
-        // Elegir cámara trasera si existe, sino la primera
         let selectedDeviceId = videoInputDevices.length > 1 
             ? videoInputDevices[videoInputDevices.length - 1].deviceId 
             : videoInputDevices[0].deviceId;
 
         await codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
           if (result) {
-            if (!codigos.includes(result.text)) {
-              codigos.push(result.text);
-              mostrarLista();
-            }
+            agregarCodigo(result.text);
           }
         });
       } catch (err) {
