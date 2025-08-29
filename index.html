@@ -3,21 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stock de Telas - Lectura</title>
+  <title>TecoScan</title>
   <script src="https://unpkg.com/@zxing/library@latest"></script>
   <style>
-    body { font-family: Arial, sans-serif; padding: 10px; }
-    h1 { font-size: 20px; }
-    #video { width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 5px; }
-    ul { list-style: none; padding: 0; }
-    li { padding: 5px; margin: 5px 0; background: #f2f2f2; border-radius: 5px; }
-    button { margin: 5px 5px 5px 0; padding: 5px 10px; }
+    body { font-family: Arial, sans-serif; padding: 10px; text-align: center; }
+    h1 { font-size: 24px; margin-bottom: 0; }
+    h3 { font-size: 14px; font-weight: normal; margin-top: 5px; color: #555; }
+    #video { width: 100%; max-width: 300px; border: 2px solid #ccc; border-radius: 8px; margin: 10px auto; display: block; }
+    ul { list-style: none; padding: 0; margin: 10px 0; text-align: left; }
+    li { padding: 8px; margin: 5px 0; background: #f2f2f2; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+    li.highlight { background: #c8f7c5; transition: background 1s ease; }
+    button { margin: 5px; padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; background: #1976d2; color: white; }
+    button:hover { background: #0d47a1; }
     .manual-input { margin: 15px 0; }
-    input[type="text"] { padding: 5px; width: 70%; }
+    input[type="text"] { padding: 6px; width: 70%; border: 1px solid #ccc; border-radius: 4px; }
+    .btn-delete { background: #e53935; }
+    .btn-delete:hover { background: #b71c1c; }
   </style>
 </head>
 <body>
-  <h1>📦 Levantamiento de Stock</h1>
+  <h1>TecoScan</h1>
+  <h3>by pm.foinap</h3>
 
   <h2>📷 Escaneo con cámara</h2>
   <video id="video"></video>
@@ -29,7 +35,7 @@
   </div>
 
   <h2>Lecturas:</h2>
-  <button onclick="eliminarTodo()">🗑️ Eliminar todas</button>
+  <button class="btn-delete" onclick="eliminarTodo()">🗑️ Eliminar todas</button>
   <ul id="lista"></ul>
 
   <button onclick="generarArchivo()">📄 Generar archivo TXT</button>
@@ -47,13 +53,18 @@
       beep.play();
     }
 
-    function mostrarLista() {
+    function mostrarLista(highlightIndex = null) {
       lista.innerHTML = "";
       codigos.forEach((codigo, i) => {
         const li = document.createElement("li");
         li.textContent = codigo;
+        if (i === highlightIndex) {
+          li.classList.add("highlight");
+          setTimeout(() => li.classList.remove("highlight"), 1500);
+        }
         const btn = document.createElement("button");
         btn.textContent = "❌ Borrar";
+        btn.className = "btn-delete";
         btn.onclick = () => {
           codigos.splice(i, 1);
           mostrarLista();
@@ -65,8 +76,8 @@
 
     function agregarCodigo(valor) {
       if (valor && !codigos.includes(valor)) {
-        codigos.unshift(valor); // 👉 agrega al inicio
-        mostrarLista();
+        codigos.unshift(valor); // 👉 agrega arriba
+        mostrarLista(0); // resalta el último
         reproducirBeep();
       }
     }
