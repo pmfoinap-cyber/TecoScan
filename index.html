@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TecoScan</title>
+<title>TecoScanWeb</title>
 <style>
   body { font-family: Arial, sans-serif; text-align: center; margin:0; padding:0; background:#f2f2f2; }
   h1 { background:#2c3e50; color:white; padding:15px; margin:0; }
@@ -24,7 +24,7 @@
 </head>
 <body>
 
-<h1>TecoScan</h1>
+<h1>TecoScanWeb</h1>
 <h3>by pm.foinap</h3>
 
 <video id="video" autoplay></video>
@@ -140,7 +140,7 @@ async function shareFile() {
   const fechaHora = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
   const filename = `TecoScan_${yyyy}${mm}${dd}_${hh}${min}.txt`;
 
-  let contenido = `TecoScan\nCantidad de etiquetas: ${codes.length}\nFecha: ${fechaHora}\n\n`;
+  let contenido = `TecoScanWeb\nCantidad de etiquetas: ${codes.length}\nFecha: ${fechaHora}\n\n`;
   codes.forEach((code,i)=> contenido += `${i+1} - ${code}\n`);
 
   const blob = new Blob([contenido], {type:"text/plain"});
@@ -149,7 +149,7 @@ async function shareFile() {
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({
-        title: "TecoScan",
+        title: "TecoScanWeb",
         text: `Lecturas de TecoScan - ${fechaHora}`,
         files: [file]
       });
