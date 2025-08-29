@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stock de Telas - Lectura</title>
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 10px; }
+    h1 { font-size: 20px; }
+    #video { width: 100%; max-width: 400px; border: 1px solid #ccc; border-radius: 5px; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 5px; margin: 5px 0; background: #f2f2f2; border-radius: 5px; }
+    button { margin-left: 10px; padding: 5px 10px; }
+    .manual-input { margin: 15px 0; }
+    input[type="text"] { padding: 5px; width: 70%; }
+  </style>
+</head>
+<body>
+  <h1>📦 Levantamiento de Stock</h1>
+
+  <h2>📷 Escaneo con cámara</h2>
+  <video id="video"></video>
+
+  <div class="manual-input">
+    <h2>➕ Cargar manualmente</h2>
+    <input type="text" id="manualCode" placeholder="Ingresar código">
+    <button onclick="agregarManual()">Agregar</button>
+  </div>
+
+  <h2>Lecturas:</h2>
+  <ul id="lista"></ul>
+
+  <button onclick="generarArchivo()">📄 Generar archivo TXT</button>
+
+  <script>
+    let codigos = [];
+    const lista = document.getElementById("lista");
+
+    function mostrarLista() {
+      lista.innerHTML = "";
+      codigos.forEach((codigo, i) => {
+        const li = document.createElement("li");
+        li.textContent = codigo;
+        const btn = document.createElement("button");
+        btn.textContent = "❌ Borrar";
+        btn.onclick = () => {
+          codigos.splice(i, 1);
+          mostrarLista();
+        };
+        li.appendChild(btn);
+        lista.appendChild(li);
+      });
+    }
+
+    function agregarManual() {
+      const input = document.getElementById("manualCode");
+      const valor = input.value.trim();
+      if (valor && !codigos.includes(valor)) {
+        codigos.push(valor);
+        mostrarLista();
+      }
+      input.value = "";
+    }
+
+    function generarArchivo() {
+      if (codigos.length === 0) {
+        alert("No hay lecturas para exportar.");
+        return;
+      }
+      const contenido = codigos.join("\n");
+      const blob = new Blob([contenido], { type: "text/plain" });
+      const enlace = document.createElement("a");
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = "stock_telas.txt";
+      enlace.click();
+    }
+
+    // Inicializar lector de ZXing
+    async function iniciarScanner() {
+      const codeReader = new ZXing.BrowserMultiFormatReader();
+      try {
+        const videoInputDevices = await codeReader.listVideoInputDevices();
+        // Elegir cámara trasera si existe, sino la primera
+        let selectedDeviceId = videoInputDevices.length > 1 
+            ? videoInputDevices[videoInputDevices.length - 1].deviceId 
+            : videoInputDevices[0].deviceId;
+
+        await codeReader.decodeFromVideoDevice(selectedDeviceId, 'video', (result, err) => {
+          if (result) {
+            if (!codigos.includes(result.text)) {
+              codigos.push(result.text);
+              mostrarLista();
+            }
+          }
+        });
+      } catch (err) {
+        console.error("Error al iniciar cámara: ", err);
+      }
+    }
+
+    iniciarScanner();
+  </script>
+</body>
+</html>
